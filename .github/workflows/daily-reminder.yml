@@ -1,0 +1,71 @@
+name: Daily Reminder
+
+on:
+  schedule:
+    # Runs at 8:00 AM UTC (1:45 PM NPT - Nepal Time) every day
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Send Daily Reminder
+        run: |
+          echo "==================================="
+          echo "📅 Daily Reminder - $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "==================================="
+          echo ""
+          echo "📚 Exam Schedule Reminders:"
+          echo "  - Check your exam schedule"
+          echo "  - Review study materials"
+          echo "  - Complete pending assignments"
+          echo ""
+          echo "💼 ITRI Internship Goals:"
+          echo "  - Track your daily progress"
+          echo "  - Review project milestones"
+          echo "  - Complete assigned tasks"
+          echo "  - Document your learnings"
+          echo ""
+          echo "✨ Stay focused and keep moving forward!"
+          echo "==================================="
+      
+      - name: Get current date
+        id: date
+        run: echo "date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
+      
+      - name: Create reminder summary
+        run: |
+          cat > reminder-summary.md << EOF
+          # Daily Reminder Summary
+          
+          **Date:** $(date '+%Y-%m-%d %H:%M:%S')
+          
+          ## 📚 Exam Schedule
+          - [ ] Check exam schedule
+          - [ ] Review study materials
+          - [ ] Complete pending assignments
+          
+          ## 💼 ITRI Internship
+          - [ ] Track daily progress
+          - [ ] Review project milestones
+          - [ ] Complete assigned tasks
+          - [ ] Document learnings
+          
+          ---
+          *This is an automated daily reminder from GitHub Actions*
+          EOF
+          cat reminder-summary.md
+      
+      - name: Upload reminder artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-reminder-${{ steps.date.outputs.date }}
+          path: reminder-summary.md
+          retention-days: 7
